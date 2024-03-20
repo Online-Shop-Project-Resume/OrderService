@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 public class OrderItemResponse {
     private Long id;
     private String skuCode;
-    private BigDecimal price;
     private Integer quantity;
     private String inventoryId;
     @JsonIgnoreProperties("orderItemList")

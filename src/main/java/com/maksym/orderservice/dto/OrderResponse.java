@@ -20,7 +20,7 @@ public class OrderResponse {
     private String orderNumber;
     private LocalDateTime orderDate;
     private OrderStatus status;
-    private Long userId;
+    private String userId;
     private List<OrderItem> orderItemList;
 
     @Override

@@ -2,6 +2,7 @@ package com.maksym.orderservice.controller;
 
 import com.maksym.orderservice.dto.OrderItemRequest;
 import com.maksym.orderservice.service.OrderItemServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class OrderItemController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody OrderItemRequest orderItemRequestDto) {
+    public ResponseEntity<Object> create(@RequestBody @Valid OrderItemRequest orderItemRequestDto) {
         return new ResponseEntity<>(orderLineItemService.create(orderItemRequestDto), HttpStatus.CREATED);
     }
 
@@ -32,7 +33,7 @@ public class OrderItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") Long id, @RequestBody OrderItemRequest orderItemRequestDto) {
+    public ResponseEntity<Object> update(@PathVariable("id") Long id, @RequestBody @Valid OrderItemRequest orderItemRequestDto) {
         return new ResponseEntity<>(orderLineItemService.update(id, orderItemRequestDto), HttpStatus.OK);
     }
 

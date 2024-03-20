@@ -24,7 +24,7 @@ public class Order {
     private LocalDateTime orderDate;
     private String inventoryId;
     private OrderStatus status;
-    private Long userId;
+    private String userId;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItemList;
 }

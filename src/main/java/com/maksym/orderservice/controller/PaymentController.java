@@ -3,6 +3,7 @@ package com.maksym.orderservice.controller;
 import com.maksym.orderservice.dto.PaymentRequest;
 import com.maksym.orderservice.dto.PaymentResponse;
 import com.maksym.orderservice.service.PaymentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class PaymentController {
     }
 
     @PostMapping
-    public PaymentResponse create(@RequestBody PaymentRequest paymentRequest) {
+    public PaymentResponse create(@RequestBody @Valid PaymentRequest paymentRequest) {
         return paymentService.create(paymentRequest);
     }
 
@@ -35,7 +36,7 @@ public class PaymentController {
     }
 
     @PutMapping("/{id}")
-    public PaymentResponse update(@PathVariable Long id, @RequestBody PaymentRequest paymentRequest) {
+    public PaymentResponse update(@PathVariable Long id, @RequestBody @Valid PaymentRequest paymentRequest) {
         return paymentService.update(id, paymentRequest);
     }
 

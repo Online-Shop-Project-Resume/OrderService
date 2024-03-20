@@ -5,7 +5,7 @@ import com.maksym.orderservice.dto.OrderItemResponse;
 import com.maksym.orderservice.dtoMapper.OrderItemMapper;
 import com.maksym.orderservice.model.Order;
 import com.maksym.orderservice.model.OrderItem;
-import com.maksym.orderservice.repository.OrderLineItemRepository;
+import com.maksym.orderservice.repository.OrderItemRepository;
 import com.maksym.orderservice.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +17,11 @@ import java.util.List;
 @Slf4j
 public class OrderItemServiceImpl implements OrderItemService {
 
-    private final OrderLineItemRepository orderLineItemRepository;
+    private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
 
-    public OrderItemServiceImpl(OrderLineItemRepository orderLineItemRepository, OrderRepository orderRepository) {
-        this.orderLineItemRepository = orderLineItemRepository;
+    public OrderItemServiceImpl(OrderItemRepository orderItemRepository, OrderRepository orderRepository) {
+        this.orderItemRepository = orderItemRepository;
         this.orderRepository = orderRepository;
     }
 
@@ -34,14 +34,14 @@ public class OrderItemServiceImpl implements OrderItemService {
                     .orElseThrow(() -> new EntityNotFoundException("Order line item with id " + orderItem.getId() + " not found"));
             orderItem.setOrder(order);
         }
-        OrderItem savedOrderLineItem = orderLineItemRepository.save(orderItem);
+        OrderItem savedOrderLineItem = orderItemRepository.save(orderItem);
         return OrderItemMapper.toResponse(savedOrderLineItem);
     }
 
     @Override
     public OrderItemResponse getById(Long id) {
         log.info("OrderItem get by id: {}", id);
-        OrderItem orderItem = orderLineItemRepository.findById(id)
+        OrderItem orderItem = orderItemRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Order line item with id " + id + " not found"));
         return OrderItemMapper.toResponse(orderItem);
     }
@@ -49,7 +49,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     public List<OrderItemResponse> getAll() {
         log.info("OrderItem get all");
-        List<OrderItem> orderItemList = orderLineItemRepository.findAll();
+        List<OrderItem> orderItemList = orderItemRepository.findAll();
         return orderItemList.stream().map(OrderItemMapper::toResponse).toList();
     }
 
@@ -58,16 +58,16 @@ public class OrderItemServiceImpl implements OrderItemService {
         log.info("OrderItem update by id: {}, OrderItemRequest: {}", id, orderItemRequest);
         OrderItem updatedOrderItem = OrderItemMapper.toModel(orderItemRequest);
         updatedOrderItem.setId(id);
-        OrderItem savedOrderLineItem = orderLineItemRepository.save(updatedOrderItem);
+        OrderItem savedOrderLineItem = orderItemRepository.save(updatedOrderItem);
         return OrderItemMapper.toResponse(savedOrderLineItem);
     }
 
     @Override
     public void delete(Long id) {
         log.info("OrderItem delete by id: {}", id);
-        if (!orderLineItemRepository.existsById(id)) {
+        if (!orderItemRepository.existsById(id)) {
             throw new EntityNotFoundException("Order line item with id " + id + " not found");
         }
-        orderLineItemRepository.deleteById(id);
+        orderItemRepository.deleteById(id);
     }
 }

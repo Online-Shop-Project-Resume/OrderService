@@ -6,9 +6,9 @@ import com.maksym.orderservice.dto.OrderItemResponse;
 import java.util.List;
 
 public interface OrderItemService {
-    OrderItemResponse create(OrderItemRequest orderItemRequestDto);
-    OrderItemResponse getById(Long id);
-    List<OrderItemResponse> getAll();
-    OrderItemResponse update(Long id, OrderItemRequest orderItemRequestDto);
+    public OrderItemResponse create(OrderItemRequest orderItemRequestDto);
+    public OrderItemResponse getById(Long id);
+    public List<OrderItemResponse> getAll();
+    public OrderItemResponse update(Long id, OrderItemRequest orderItemRequestDto);
     void delete(Long id);
 }
