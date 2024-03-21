@@ -7,7 +7,6 @@ import com.maksym.orderservice.exception.GlobalExceptionHandler;
 import com.maksym.orderservice.service.OrderServiceImpl;
 import com.maksym.orderservice.staticObject.StaticOrder;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
