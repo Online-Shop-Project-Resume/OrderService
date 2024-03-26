@@ -2,6 +2,7 @@ package com.maksym.orderservice.controller;
 
 import com.maksym.orderservice.dto.OrderRequest;
 import com.maksym.orderservice.service.OrderServiceImpl;
+import com.maksym.orderservice.util.enums.OrderStatus;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import jakarta.validation.Valid;
@@ -39,6 +40,13 @@ public class OrderController {
     public ResponseEntity<Object> updateOrder(@PathVariable("id") Long id, @RequestBody @Valid OrderRequest orderRequest) {
         return new ResponseEntity<>(orderServiceImpl.updateOrder(id, orderRequest), HttpStatus.OK);
     }
+
+    @PutMapping("/status/{id}")
+    public ResponseEntity<Object> updateStatusOrder(@PathVariable("id") Long id, @RequestParam("status") String status) {
+        OrderStatus orderStatus = OrderStatus.valueOf(status);
+        return new ResponseEntity<>(orderServiceImpl.updateStatusOrder(id, orderStatus), HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteOrder(@PathVariable("id") Long id) {
