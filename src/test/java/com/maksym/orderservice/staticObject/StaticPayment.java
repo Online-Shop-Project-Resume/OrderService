@@ -1,34 +1,61 @@
 package com.maksym.orderservice.staticObject;
 
-import com.maksym.orderservice.dto.PaymentRequest;
-import com.maksym.orderservice.dto.PaymentResponse;
+import com.maksym.orderservice.dto.request.PaymentDtoRequest;
+import com.maksym.orderservice.dto.response.PaymentDtoResponse;
 import com.maksym.orderservice.model.Payment;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 public class StaticPayment {
-    public static Payment payment(){
-        Payment payment = new Payment();
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setId(1L);
-        payment.setQuantity(10);
-        payment.setOrderId(1L);
-        return payment;
+
+    public static final Long ID = 1L;
+
+    public static Payment payment1() {
+        Payment model = new Payment();
+        model.setId(ID);
+        model.setTotal(new BigDecimal(10));
+        model.setOrderId(1L);
+        model.setPaymentDate(LocalDateTime.MIN);
+        model.setQuantity(1);
+        return model;
     }
 
-    public static PaymentRequest paymentRequest(){
-        PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setQuantity(10);
-        paymentRequest.setOrderId(1L);
-        return paymentRequest;
+    public static Payment payment2() {
+        Payment model = new Payment();
+        model.setId(ID);
+        model.setTotal(new BigDecimal(20));
+        model.setOrderId(2L);
+        model.setPaymentDate(LocalDateTime.MIN);
+        model.setQuantity(2);
+        return model;
     }
 
-    public static PaymentResponse paymentResponse(){
-        PaymentResponse paymentResponse = new PaymentResponse();
-        paymentResponse.setPaymentDate(LocalDateTime.now());
-        paymentResponse.setId(1L);
-        paymentResponse.setQuantity(10);
-        paymentResponse.setOrderId(1L);
-        return paymentResponse;
+    public static PaymentDtoRequest paymentDtoRequest1() {
+        PaymentDtoRequest dtoRequest = new PaymentDtoRequest();
+        dtoRequest.setTotal(new BigDecimal(10));
+        dtoRequest.setOrderId(1L);
+        dtoRequest.setQuantity(1);
+        return dtoRequest;
+    }
+
+    public static PaymentDtoResponse paymentDtoResponse1() {
+        PaymentDtoResponse dtoResponse = new PaymentDtoResponse();
+        dtoResponse.setId(ID);
+        dtoResponse.setTotal(new BigDecimal(10));
+        dtoResponse.setOrderId(1L);
+        dtoResponse.setPaymentDate(LocalDateTime.MIN);
+        dtoResponse.setQuantity(1);
+        return dtoResponse;
+    }
+
+    public static PaymentDtoResponse paymentDtoResponse2() {
+        PaymentDtoResponse dtoResponse = new PaymentDtoResponse();
+        dtoResponse.setId(ID);
+        dtoResponse.setTotal(new BigDecimal(20));
+        dtoResponse.setOrderId(2L);
+        dtoResponse.setPaymentDate(LocalDateTime.MIN);
+        dtoResponse.setQuantity(2);
+        return dtoResponse;
     }
 }

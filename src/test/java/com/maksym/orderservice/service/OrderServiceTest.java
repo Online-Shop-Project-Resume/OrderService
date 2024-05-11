@@ -1,100 +1,148 @@
 package com.maksym.orderservice.service;
 
-import com.maksym.orderservice.dto.OrderRequest;
-import com.maksym.orderservice.dto.OrderResponse;
+
+import com.maksym.orderservice.exception.EntityNotFoundException;
 import com.maksym.orderservice.model.Order;
 import com.maksym.orderservice.repository.OrderRepository;
 import com.maksym.orderservice.staticObject.StaticOrder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class OrderServiceTest {
+class OrderServiceTest {
 
-    private final Long id = 1L;
     @Mock
     private OrderRepository orderRepository;
-
     @InjectMocks
-    private OrderServiceImpl orderService;
+    private OrderService orderService;
+    private final Order order = StaticOrder.order1();
+    private final Order order2 = StaticOrder.order2();
 
-    @Test
-    public void testCreateOrder() {
-        // Given
-        OrderRequest orderRequest = StaticOrder.orderRequest();
-        Order order = StaticOrder.order1();
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
-
-        // When
-        OrderResponse response = orderService.createOrder(orderRequest);
-
-        // Then
-        assertNotNull(response);
-        // Add more assertions as needed
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testGetOrderById() {
-        Order order = StaticOrder.order1();
-        when(orderRepository.findById(id)).thenReturn(Optional.of(order));
+    void testCreate() {
+	    when(orderRepository.save(any(Order.class))).thenReturn(order);
 
-        // When
-        OrderResponse response = orderService.getOrderById(id);
+        Order createdOrder = orderService.create(order);
 
-        // Then
-        assertNotNull(response);
-        // Add more assertions as needed
+        assertNotNull(createdOrder);
+        assertEquals(order, createdOrder);
+        verify(orderRepository, times(1)).save(order);
     }
 
     @Test
-    public void testGetAllOrders() {
-        // Given
-        List<Order> orders = new ArrayList<>();
-        when(orderRepository.findAll()).thenReturn(orders);
+    void testCreate_DataAccessException() {
+        when(orderRepository.findById(StaticOrder.ID)).thenThrow(new DataAccessException("Database connection failed") {
+        });
 
-        // When
-        List<OrderResponse> responses = orderService.getAllOrders();
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> orderService.getById(StaticOrder.ID));
 
-        // Then
-        assertNotNull(responses);
-        // Add more assertions as needed
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(orderRepository, times(1)).findById(StaticOrder.ID);
     }
 
     @Test
-    public void testUpdateOrder() {
-        // Given
-        OrderRequest orderRequest = new OrderRequest();
-        Order order = new Order();
-        when(orderRepository.existsById(id)).thenReturn(true);
-        when(orderRepository.save(any(Order.class))).thenReturn(order);
+    void testGetAll() {
+        List<Order> orderList = new ArrayList<>();
+        orderList.add(order);
+        orderList.add(order2);
+        Page<Order> orderPage = new PageImpl<>(orderList);
+        Pageable pageable = Pageable.unpaged();
+        when(orderRepository.findAll(pageable)).thenReturn(orderPage);
 
-        // When
-        OrderResponse response = orderService.updateOrder(id, orderRequest);
+        Page<Order> result = orderService.getAll(pageable);
 
-        // Then
-        assertNotNull(response);
-        // Add more assertions as needed
+        assertEquals(orderList.size(), result.getSize());
+        assertEquals(order, result.getContent().get(0));
+        assertEquals(order2, result.getContent().get(1));
     }
 
     @Test
-    public void testDeleteOrder() {
-        // When
-        orderService.deleteOrder(id);
+    void testGetAll_AnyException() {
+        when(orderRepository.findAll(any(Pageable.class))).thenThrow(new DataAccessException("Database connection failed") {});
 
-        // Then
-        verify(orderRepository).deleteById(id);
+        Pageable pageable = Pageable.unpaged();
+        RuntimeException exception = assertThrows(DataAccessException.class, () -> orderService.getAll(pageable));
+
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(orderRepository, times(1)).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void testUpdate_Success() {
+	    Order existingOrder = StaticOrder.order1();
+        Order updatedOrder = StaticOrder.order2();
+	    when(orderRepository.findById(StaticOrder.ID)).thenReturn(java.util.Optional.of(existingOrder));
+        when(orderRepository.save(updatedOrder)).thenReturn(updatedOrder);
+
+        Order result = orderService.updateById(StaticOrder.ID, updatedOrder);
+
+        assertEquals(updatedOrder, result);
+        verify(orderRepository, times(1)).findById(StaticOrder.ID);
+        verify(orderRepository, times(1)).save(updatedOrder);
+    }
+
+
+    @Test
+    void testUpdateById_EntityNotFoundException() {
+        Order updatedOrder = StaticOrder.order1();
+        when(orderRepository.findById(StaticOrder.ID)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> orderService.updateById(StaticOrder.ID, updatedOrder));
+        verify(orderRepository, times(1)).findById(StaticOrder.ID);
+        verify(orderRepository, never()).save(updatedOrder);
+    }
+
+    @Test
+    void testUpdateById_AnyException() {
+        Order existingOrder = StaticOrder.order1();
+        Order updatedOrder = StaticOrder.order2();
+        when(orderRepository.findById(StaticOrder.ID)).thenReturn(java.util.Optional.of(existingOrder));
+	    when(orderRepository.save(updatedOrder)).thenThrow(new DataAccessException("Database connection failed") {
+        });
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> orderService.updateById(StaticOrder.ID, updatedOrder));
+
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(orderRepository, times(1)).save(updatedOrder);
+    }
+
+    @Test
+    void testDeleteById_Success() {
+        boolean result = orderService.deleteById(StaticOrder.ID);
+
+        verify(orderRepository).deleteById(StaticOrder.ID);
+        assertTrue(result);
+    }
+
+    @Test
+    void testDeleteById_AnyException() {
+        doThrow(new DataAccessException("Database connection failed") {}).when(orderRepository).deleteById(StaticOrder.ID);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> orderService.deleteById(StaticOrder.ID));
+
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(orderRepository, times(1)).deleteById(StaticOrder.ID);
     }
 }
-

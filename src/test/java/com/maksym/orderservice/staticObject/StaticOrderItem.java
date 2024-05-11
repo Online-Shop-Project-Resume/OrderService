@@ -1,37 +1,60 @@
 package com.maksym.orderservice.staticObject;
 
-import com.maksym.orderservice.dto.OrderItemRequest;
-import com.maksym.orderservice.dto.OrderItemResponse;
-import com.maksym.orderservice.model.Order;
+import com.maksym.orderservice.dto.request.OrderItemDtoRequest;
+import com.maksym.orderservice.dto.response.OrderItemDtoResponse;
 import com.maksym.orderservice.model.OrderItem;
 
+
 public class StaticOrderItem {
-    public static OrderItemResponse orderItemResponse(){
-        OrderItemResponse orderItemResponse = new OrderItemResponse();
-        orderItemResponse.setId(1L);
-        orderItemResponse.setInventoryId("1");
-        orderItemResponse.setQuantity(10);
-        orderItemResponse.setSkuCode("SKU001");
-        orderItemResponse.setOrder(StaticOrder.order1());
-        return orderItemResponse;
+
+    public static final Long ID = 1L;
+
+    public static OrderItem orderItem1() {
+        OrderItem model = new OrderItem();
+        model.setId(ID);
+        model.setSkuCode("skuCode");
+        model.setQuantity(1);
+        model.setInventoryId("inventoryId");
+        model.setOrder(StaticOrder.order1());
+        return model;
     }
 
-    public static OrderItem orderItem(){
-        OrderItem orderItem = new OrderItem();
-        orderItem.setId(1L);
-        orderItem.setInventoryId("1");
-        orderItem.setQuantity(10);
-        orderItem.setSkuCode("SKU001");
-        orderItem.setOrder(StaticOrder.order1());
-        return orderItem;
+    public static OrderItem orderItem2() {
+        OrderItem model = new OrderItem();
+        model.setId(ID);
+        model.setSkuCode("skuCode");
+        model.setQuantity(2);
+        model.setInventoryId("inventoryId");
+        model.setOrder(StaticOrder.order2());
+        return model;
     }
 
-    public static OrderItemRequest orderItemRequest(){
-        OrderItemRequest orderItemRequest = new OrderItemRequest();
-        orderItemRequest.setInventoryId("1");
-        orderItemRequest.setQuantity(10);
-        orderItemRequest.setSkuCode("SKU001");
-        orderItemRequest.setOrderId(1L);
-        return orderItemRequest;
+    public static OrderItemDtoRequest orderItemDtoRequest1() {
+        OrderItemDtoRequest dtoRequest = new OrderItemDtoRequest();
+        dtoRequest.setSkuCode("skuCode");
+        dtoRequest.setQuantity(1);
+        dtoRequest.setInventoryId("inventoryId");
+        dtoRequest.setOrderId(1L);
+        return dtoRequest;
+    }
+
+    public static OrderItemDtoResponse orderItemDtoResponse1() {
+        OrderItemDtoResponse dtoResponse = new OrderItemDtoResponse();
+        dtoResponse.setId(ID);
+        dtoResponse.setSkuCode("skuCode");
+        dtoResponse.setQuantity(1);
+        dtoResponse.setInventoryId("inventoryId");
+        dtoResponse.setOrder(StaticOrder.orderDtoResponse1());
+        return dtoResponse;
+    }
+
+    public static OrderItemDtoResponse orderItemDtoResponse2() {
+        OrderItemDtoResponse dtoResponse = new OrderItemDtoResponse();
+        dtoResponse.setId(ID);
+        dtoResponse.setSkuCode("skuCode");
+        dtoResponse.setQuantity(2);
+        dtoResponse.setInventoryId("inventoryId");
+        dtoResponse.setOrder(StaticOrder.orderDtoResponse1());
+        return dtoResponse;
     }
 }

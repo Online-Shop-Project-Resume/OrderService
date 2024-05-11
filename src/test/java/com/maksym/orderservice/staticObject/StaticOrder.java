@@ -1,38 +1,65 @@
 package com.maksym.orderservice.staticObject;
 
-import com.maksym.orderservice.dto.OrderRequest;
-import com.maksym.orderservice.dto.OrderResponse;
+import com.maksym.orderservice.dto.request.OrderDtoRequest;
+import com.maksym.orderservice.dto.response.OrderDtoResponse;
 import com.maksym.orderservice.model.Order;
-import com.maksym.orderservice.util.enums.OrderStatus;
 
 import java.time.LocalDateTime;
 
 public class StaticOrder {
-    public static Order order1(){
-        Order order = new Order();
-        order.setOrderNumber("1");
-        order.setOrderDate(LocalDateTime.now());
-        order.setId(1L);
-        order.setUserId("1");
-        order.setInventoryId("1");
-        order.setStatus(OrderStatus.DELIVERED);
-        return order;
-    }
-    public static OrderResponse orderResponse1(){
-        OrderResponse orderResponse = new OrderResponse();
-        orderResponse.setOrderDate(LocalDateTime.now());
-        orderResponse.setOrderNumber("1");
-        orderResponse.setStatus(OrderStatus.DELIVERED);
-        orderResponse.setUserId("1");
-        orderResponse.setId(1L);
-        return orderResponse;
+
+    public static final Long ID = 1L;
+
+    public static Order order1() {
+        Order model = new Order();
+        model.setId(ID);
+        model.setOrderNumber("orderNumber");
+        model.setOrderDate(LocalDateTime.MIN);
+        model.setInventoryId("inventoryId");
+        model.setStatus(StaticOrderStatus.orderStatus1());
+        model.setUserId("userId");
+        return model;
     }
 
-    public static OrderRequest orderRequest(){
-        OrderRequest orderRequest = new OrderRequest();
-        orderRequest.setOrderNumber("1");
-        orderRequest.setStatus(OrderStatus.DELIVERED);
-        orderRequest.setUserId("1");
-        return orderRequest;
+    public static Order order2() {
+        Order model = new Order();
+        model.setId(ID);
+        model.setOrderNumber("orderNumber");
+        model.setOrderDate(LocalDateTime.MIN);
+        model.setInventoryId("inventoryId");
+        model.setStatus(StaticOrderStatus.orderStatus2());
+        model.setUserId("userId");
+        return model;
+    }
+
+    public static OrderDtoRequest orderDtoRequest1() {
+        OrderDtoRequest dtoRequest = new OrderDtoRequest();
+        dtoRequest.setOrderNumber("orderNumber");
+        dtoRequest.setInventoryId("inventoryId");
+        dtoRequest.setStatus("status");
+        dtoRequest.setUserId("userId");
+        return dtoRequest;
+    }
+
+    public static OrderDtoResponse orderDtoResponse1() {
+        OrderDtoResponse dtoResponse = new OrderDtoResponse();
+        dtoResponse.setId(ID);
+        dtoResponse.setOrderNumber("orderNumber");
+        dtoResponse.setOrderDate(LocalDateTime.MIN);
+        dtoResponse.setInventoryId("inventoryId");
+        dtoResponse.setStatus(StaticOrderStatus.orderStatusDtoResponse1());
+        dtoResponse.setUserId("userId");
+        return dtoResponse;
+    }
+
+    public static OrderDtoResponse orderDtoResponse2() {
+        OrderDtoResponse dtoResponse = new OrderDtoResponse();
+        dtoResponse.setId(ID);
+        dtoResponse.setOrderNumber("orderNumber");
+        dtoResponse.setOrderDate(LocalDateTime.MIN);
+        dtoResponse.setInventoryId("inventoryId");
+        dtoResponse.setStatus(StaticOrderStatus.orderStatusDtoResponse1());
+        dtoResponse.setUserId("userId");
+        return dtoResponse;
     }
 }

@@ -1,101 +1,148 @@
 package com.maksym.orderservice.service;
 
-import com.maksym.orderservice.dto.PaymentRequest;
-import com.maksym.orderservice.dto.PaymentResponse;
+
+import com.maksym.orderservice.exception.EntityNotFoundException;
 import com.maksym.orderservice.model.Payment;
 import com.maksym.orderservice.repository.PaymentRepository;
 import com.maksym.orderservice.staticObject.StaticPayment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class PaymentServiceTest {
+class PaymentServiceTest {
 
-    private final Long id = 1L;
     @Mock
     private PaymentRepository paymentRepository;
-
     @InjectMocks
-    private PaymentServiceImpl paymentService;
+    private PaymentService paymentService;
+    private final Payment payment = StaticPayment.payment1();
+    private final Payment payment2 = StaticPayment.payment2();
 
-    @Test
-    void testCreate() {
-        PaymentRequest paymentRequest = StaticPayment.paymentRequest();
-        Payment payment = StaticPayment.payment();
-        // Set payment request fields
-
-        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-
-        PaymentResponse response = paymentService.create(paymentRequest);
-
-        assertEquals(payment.getId(), response.getId());
-        // Add more assertions as needed
-
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testGetById() {
-        Payment payment = StaticPayment.payment();
-        when(paymentRepository.findById(id)).thenReturn(Optional.of(payment));
+    void testCreate() {
+	    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
 
-        PaymentResponse response = paymentService.getById(id);
+        Payment createdPayment = paymentService.create(payment);
 
-        assertEquals(payment.getId(), response.getId());
-        // Add more assertions as needed
+        assertNotNull(createdPayment);
+        assertEquals(payment, createdPayment);
+        verify(paymentRepository, times(1)).save(payment);
+    }
 
-        verify(paymentRepository, times(1)).findById(id);
+    @Test
+    void testCreate_DataAccessException() {
+        when(paymentRepository.findById(StaticPayment.ID)).thenThrow(new DataAccessException("Database connection failed") {
+        });
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> paymentService.getById(StaticPayment.ID));
+
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(paymentRepository, times(1)).findById(StaticPayment.ID);
     }
 
     @Test
     void testGetAll() {
-        Payment payment = StaticPayment.payment();
-        when(paymentRepository.findAll()).thenReturn(Collections.singletonList(payment));
+        List<Payment> paymentList = new ArrayList<>();
+        paymentList.add(payment);
+        paymentList.add(payment2);
+        Page<Payment> paymentPage = new PageImpl<>(paymentList);
+        Pageable pageable = Pageable.unpaged();
+        when(paymentRepository.findAll(pageable)).thenReturn(paymentPage);
 
-        List<PaymentResponse> responses = paymentService.getAll();
+        Page<Payment> result = paymentService.getAll(pageable);
 
-        assertEquals(1, responses.size());
-        assertEquals(payment.getId(), responses.get(0).getId());
-        // Add more assertions as needed
-
-        verify(paymentRepository, times(1)).findAll();
+        assertEquals(paymentList.size(), result.getSize());
+        assertEquals(payment, result.getContent().get(0));
+        assertEquals(payment2, result.getContent().get(1));
     }
 
     @Test
-    void testUpdate() {
-        PaymentRequest paymentRequest = StaticPayment.paymentRequest();
-        Payment payment = StaticPayment.payment();
-        // Set payment request fields
+    void testGetAll_AnyException() {
+        when(paymentRepository.findAll(any(Pageable.class))).thenThrow(new DataAccessException("Database connection failed") {});
 
-        when(paymentRepository.existsById(id)).thenReturn(true);
-        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+        Pageable pageable = Pageable.unpaged();
+        RuntimeException exception = assertThrows(DataAccessException.class, () -> paymentService.getAll(pageable));
 
-        PaymentResponse response = paymentService.update(id, paymentRequest);
-
-        assertEquals(payment.getId(), response.getId());
-        // Add more assertions as needed
-
-        verify(paymentRepository, times(1)).existsById(id);
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(paymentRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
-    void testDelete() {
-        paymentService.delete(id);
+    void testUpdate_Success() {
+	    Payment existingPayment = StaticPayment.payment1();
+        Payment updatedPayment = StaticPayment.payment2();
+	    when(paymentRepository.findById(StaticPayment.ID)).thenReturn(java.util.Optional.of(existingPayment));
+        when(paymentRepository.save(updatedPayment)).thenReturn(updatedPayment);
 
-        verify(paymentRepository, times(1)).deleteById(id);
+        Payment result = paymentService.updateById(StaticPayment.ID, updatedPayment);
+
+        assertEquals(updatedPayment, result);
+        verify(paymentRepository, times(1)).findById(StaticPayment.ID);
+        verify(paymentRepository, times(1)).save(updatedPayment);
+    }
+
+
+    @Test
+    void testUpdateById_EntityNotFoundException() {
+        Payment updatedPayment = StaticPayment.payment1();
+        when(paymentRepository.findById(StaticPayment.ID)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> paymentService.updateById(StaticPayment.ID, updatedPayment));
+        verify(paymentRepository, times(1)).findById(StaticPayment.ID);
+        verify(paymentRepository, never()).save(updatedPayment);
+    }
+
+    @Test
+    void testUpdateById_AnyException() {
+        Payment existingPayment = StaticPayment.payment1();
+        Payment updatedPayment = StaticPayment.payment2();
+        when(paymentRepository.findById(StaticPayment.ID)).thenReturn(java.util.Optional.of(existingPayment));
+	    when(paymentRepository.save(updatedPayment)).thenThrow(new DataAccessException("Database connection failed") {
+        });
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> paymentService.updateById(StaticPayment.ID, updatedPayment));
+
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(paymentRepository, times(1)).save(updatedPayment);
+    }
+
+    @Test
+    void testDeleteById_Success() {
+        boolean result = paymentService.deleteById(StaticPayment.ID);
+
+        verify(paymentRepository).deleteById(StaticPayment.ID);
+        assertTrue(result);
+    }
+
+    @Test
+    void testDeleteById_AnyException() {
+        doThrow(new DataAccessException("Database connection failed") {}).when(paymentRepository).deleteById(StaticPayment.ID);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> paymentService.deleteById(StaticPayment.ID));
+
+        assertNotNull(exception);
+        assertEquals("Database connection failed", exception.getMessage());
+        verify(paymentRepository, times(1)).deleteById(StaticPayment.ID);
     }
 }
-
